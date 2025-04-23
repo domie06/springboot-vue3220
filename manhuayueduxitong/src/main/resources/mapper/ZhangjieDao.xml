@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.ZhangjieDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.manhua_id as manhuaId
+        ,a.zhangjie_name as zhangjieName
+        ,a.zhangjie_content as zhangjieContent
+        ,a.shangxia_types as shangxiaTypes
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.ZhangjieView" >
+        SELECT
+        <include refid="Base_Column_List" />
+
+--         级联表的字段
+        ,manhua.yonghu_id as manhuaYonghuId
+        ,manhua.manhua_name as manhuaName
+        ,manhua.manhua_uuid_number as manhuaUuidNumber
+        ,manhua.manhua_photo as manhuaPhoto
+        ,manhua.manhua_types as manhuaTypes
+        ,manhua.manhua_clicknum as manhuaClicknum
+        ,manhua.manhua_content as manhuaContent
+        ,manhua.manhua_delete as manhuaDelete
+
+        FROM zhangjie  a
+        left JOIN manhua manhua ON a.manhua_id = manhua.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.manhuaId != null and params.manhuaId != ''">
+                and (
+                    a.manhua_id = #{params.manhuaId}
+                )
+            </if>
+            <if test=" params.zhangjieName != '' and params.zhangjieName != null and params.zhangjieName != 'null' ">
+                and a.zhangjie_name like CONCAT('%',#{params.zhangjieName},'%')
+            </if>
+            <if test=" params.zhangjieContent != '' and params.zhangjieContent != null and params.zhangjieContent != 'null' ">
+                and a.zhangjie_content like CONCAT('%',#{params.zhangjieContent},'%')
+            </if>
+            <if test="params.shangxiaTypes != null and params.shangxiaTypes != ''">
+                and a.shangxia_types = #{params.shangxiaTypes}
+            </if>
+
+                <!-- 判断漫画的id不为空 -->
+            <if test=" params.manhuaIdNotNull != '' and params.manhuaIdNotNull != null and params.manhuaIdNotNull != 'null' ">
+                and a.manhua_id IS NOT NULL
+            </if>
+            <if test="params.yonghuId != null  and params.yonghuId != ''">
+                and manhua.yonghu_id = #{params.yonghuId}
+            </if>
+            <if test=" params.manhuaName != '' and params.manhuaName != null and params.manhuaName != 'null' ">
+                and manhua.manhua_name like CONCAT('%',#{params.manhuaName},'%')
+            </if>
+            <if test=" params.manhuaUuidNumber != '' and params.manhuaUuidNumber != null and params.manhuaUuidNumber != 'null' ">
+                and manhua.manhua_uuid_number like CONCAT('%',#{params.manhuaUuidNumber},'%')
+            </if>
+            <if test="params.manhuaTypes != null  and params.manhuaTypes != ''">
+                and manhua.manhua_types = #{params.manhuaTypes}
+            </if>
+
+            <if test="params.manhuaClicknumStart != null  and params.manhuaClicknumStart != '' ">
+                <![CDATA[  and manhua.manhua_clicknum >= #{params.manhuaClicknumStart}   ]]>
+            </if>
+            <if test="params.manhuaClicknumEnd != null  and params.manhuaClicknumEnd != '' ">
+                <![CDATA[  and manhua.manhua_clicknum <= #{params.manhuaClicknumEnd}   ]]>
+            </if>
+            <if test="params.manhuaClicknum != null  and params.manhuaClicknum != '' ">
+                and manhua.manhua_clicknum = #{params.manhuaClicknum}
+            </if>
+            <if test=" params.manhuaContent != '' and params.manhuaContent != null and params.manhuaContent != 'null' ">
+                and manhua.manhua_content like CONCAT('%',#{params.manhuaContent},'%')
+            </if>
+            <if test="params.shangxiaTypes != null  and params.shangxiaTypes != ''">
+                and manhua.shangxia_types = #{params.shangxiaTypes}
+            </if>
+
+            <if test="params.manhuaDeleteStart != null  and params.manhuaDeleteStart != '' ">
+                <![CDATA[  and manhua.manhua_delete >= #{params.manhuaDeleteStart}   ]]>
+            </if>
+            <if test="params.manhuaDeleteEnd != null  and params.manhuaDeleteEnd != '' ">
+                <![CDATA[  and manhua.manhua_delete <= #{params.manhuaDeleteEnd}   ]]>
+            </if>
+            <if test="params.manhuaDelete != null  and params.manhuaDelete != '' ">
+                and manhua.manhua_delete = #{params.manhuaDelete}
+            </if>
+        </where>
+
+        order by a.${params.orderBy}
+    </select>
+
+</mapper>
